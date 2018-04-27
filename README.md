@@ -14,7 +14,7 @@ The goals of this class is to provide a Blackboard mechanism for this library ht
 
 The only feasible solution seems to be type erasure, achieved either with an equivalent of [std::any](http://en.cppreference.com/w/cpp/utility/any) or [std::variant](http://en.cppreference.com/w/cpp/utility/variant).
 
-Currently we are also using our own class AnyNumber, that can store any arithmetic value (8 to 64 bits) and takes care of safe conversion of type.
+Currently we are also using our own class [AnyNumber](https://github.com/facontidavide/Blackboard/blob/master/varnumber.h#L11), that can store any arithmetic value (8 to 64 bits) and takes care of safe conversion of type.
 
 By "safe conversion" we mean that:
 
