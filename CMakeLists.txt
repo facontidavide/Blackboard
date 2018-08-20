@@ -4,6 +4,7 @@ project(Blackboard)
 
 add_definitions(-std=c++11)
 
-INCLUDE_DIRECTORIES( ./ )
+INCLUDE_DIRECTORIES( ./include )
 
-add_executable(${PROJECT_NAME} main.cpp blackboard.cpp)
+add_executable(${PROJECT_NAME} main.cpp  )
+
