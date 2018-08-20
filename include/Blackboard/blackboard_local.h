@@ -9,12 +9,11 @@ public:
 
     BlackboardLocal() {}
 
-    virtual bool get(const std::string& key, SafeAny::Any& value) const override
+    virtual const SafeAny::Any* get(const std::string& key) const override
     {
         auto it = storage_.find(key);
-        if( it == storage_.end() ){ return false; }
-        value = it->second;
-        return true;
+        if( it == storage_.end() ){ return nullptr; }
+        return &(it->second);
     }
 
     virtual void set(const std::string& key, const SafeAny::Any& value) override

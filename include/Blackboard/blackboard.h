@@ -16,14 +16,14 @@ public:
 
     virtual ~BlackboardImpl() = default;
 
-    virtual bool get(const std::string& key, SafeAny::Any& value) const = 0;
+    virtual const SafeAny::Any* get(const std::string& key) const = 0;
     virtual void set(const std::string& key, const SafeAny::Any& value) = 0;
 };
 
 
-// Blackboard is the front-end used by the developer.
+// Blackboard is the front-end to be used by the developer.
 // Even if the abstract class BlackboardImpl can be used directly,
-// the templatized methods set() and get() are more
+// the templatized methods set() and get() are more user-friendly
 class Blackboard
 {
 public:
@@ -45,16 +45,8 @@ public:
 
 private:
 
-
-    // This implementation is triggered by a integral number or a floating point
-    template <typename T, typename std::enable_if<std::is_arithmetic<T>::value, T>::type* = nullptr>
-    void setImpl(const std::string& key,const T& value)
-    {
-        impl_->set(key, SafeAny::Any(value));
-    }
-
     // Not a number, nor a std::string, nor a const char*
-    template <typename T, typename std::enable_if<!std::is_arithmetic<T>::value, T>::type* = nullptr>
+    template <typename T>
     void setImpl(const std::string& key,const T& value)
     {
         impl_->set(key, SafeAny::Any(value));
@@ -65,39 +57,13 @@ private:
         impl_->set(key, std::string(value));
     }
 
-    void setImpl(const std::string& key,const std::string& value)
-    {
-        impl_->set(key, value);
-    }
-
-    // This implementation is triggered by a integral number or a floating point
-    template <typename T, typename std::enable_if<std::is_arithmetic<T>::value, T>::type* = nullptr>
+    template <typename T>
     bool getImpl(const std::string& key, T& value) const
     {
-        SafeAny::Any num;
-        bool found = impl_->get(key, num);
-        if( !found ){ return false; }
-        value = num.convert<T>();
-        return true;
-    }
+        const SafeAny::Any* val = impl_->get(key);
+        if( !val ){ return false; }
 
-    // Not a number, nor a std::string, nor a const char*
-    template <typename T, typename std::enable_if<!std::is_arithmetic<T>::value, T>::type* = nullptr>
-    bool getImpl(const std::string& key, T& value) const
-    {
-        SafeAny::Any res;
-        bool found = impl_->get(key, res);
-        if( !found ){ return false; }
-        value = linb::any_cast<T>(res);
-        return true;
-    }
-
-    bool getImpl(const std::string& key, std::string& value) const
-    {
-        SafeAny::Any res;
-        bool found = impl_->get(key, res);
-        if( !found ){ return false; }
-        value = linb::any_cast<std::string>(res);
+        value = val->convert<T>();
         return true;
     }
 
