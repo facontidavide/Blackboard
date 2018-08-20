@@ -6,8 +6,9 @@
 #include <memory>
 #include <stdint.h>
 #include <unordered_map>
-#include "nonstd/any.hpp"
-#include "varnumber.h"
+
+#include <SafeAny/safe_any.hpp>
+
 
 class BlackboardImpl
 {
@@ -15,14 +16,8 @@ public:
 
     virtual ~BlackboardImpl() = default;
 
-    virtual bool get(const std::string& key, nonstd::any& value) const = 0;
-    virtual void set(const std::string& key, const nonstd::any& value) = 0;
-
-    virtual bool get(const std::string& key, AnyNumber& value) const = 0;
-    virtual void set(const std::string& key, const AnyNumber& value) = 0;
-
-    virtual bool get(const std::string& key, std::string& value) const = 0;
-    virtual void set(const std::string& key, const std::string& value) = 0;
+    virtual bool get(const std::string& key, SafeAny::Any& value) const = 0;
+    virtual void set(const std::string& key, const SafeAny::Any& value) = 0;
 };
 
 
@@ -55,14 +50,14 @@ private:
     template <typename T, typename std::enable_if<std::is_arithmetic<T>::value, T>::type* = nullptr>
     void setImpl(const std::string& key,const T& value)
     {
-        impl_->set(key, AnyNumber(value));
+        impl_->set(key, SafeAny::Any(value));
     }
 
     // Not a number, nor a std::string, nor a const char*
     template <typename T, typename std::enable_if<!std::is_arithmetic<T>::value, T>::type* = nullptr>
     void setImpl(const std::string& key,const T& value)
     {
-        impl_->set(key, nonstd::any(value));
+        impl_->set(key, SafeAny::Any(value));
     }
 
     void setImpl(const std::string& key,const char* value)
@@ -79,7 +74,7 @@ private:
     template <typename T, typename std::enable_if<std::is_arithmetic<T>::value, T>::type* = nullptr>
     bool getImpl(const std::string& key, T& value) const
     {
-        AnyNumber num;
+        SafeAny::Any num;
         bool found = impl_->get(key, num);
         if( !found ){ return false; }
         value = num.convert<T>();
@@ -90,16 +85,20 @@ private:
     template <typename T, typename std::enable_if<!std::is_arithmetic<T>::value, T>::type* = nullptr>
     bool getImpl(const std::string& key, T& value) const
     {
-        nonstd::any res;
+        SafeAny::Any res;
         bool found = impl_->get(key, res);
         if( !found ){ return false; }
-        value = nonstd::any_cast<T>(res);
+        value = linb::any_cast<T>(res);
         return true;
     }
 
     bool getImpl(const std::string& key, std::string& value) const
     {
-        return impl_->get(key, value);
+        SafeAny::Any res;
+        bool found = impl_->get(key, res);
+        if( !found ){ return false; }
+        value = linb::any_cast<std::string>(res);
+        return true;
     }
 
     std::unique_ptr<BlackboardImpl> impl_;

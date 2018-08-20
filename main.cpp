@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "blackboard_local.h"
+#include "Blackboard/blackboard_local.h"
 
 using namespace std;
 
@@ -30,7 +30,7 @@ int main()
     cout << "hello: "<< world << endl;
     cout << "vect: " << vals[0] << " " << vals[1] << " " << vals[2] << endl;
 
-    AnyNumber v(5u);
+    SafeAny::Any v(5u);
 
      cout << "var: " << v.convert<float>()  << endl;
 
